@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What would a buyer pay for your business? | Transworld Business Advisors of NY</title>
+<meta name="description" content="Free Buyer's-Eye Check for New York business owners. Answer a few quick questions and see your sellability score right away. 100% confidential.">
+<link rel="icon" href="assets/symbol.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap">
+<style>
+:root { --green: #00461C; --gold: #9D7D4F; --light: #E9F0E0; --white: #FFFFFF; }
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: 'DM Sans', Arial, sans-serif; color: var(--green); background: var(--light); -webkit-text-size-adjust: 100%; }
+body.dark { background: var(--green); color: var(--white); }
+button, input { font-family: inherit; }
+#app { max-width: 480px; margin: 0 auto; min-height: 100vh; min-height: 100dvh; padding: 24px 24px 28px; display: flex; flex-direction: column; gap: 18px; }
+.serif { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; }
+h1, h2, p { margin: 0; }
+h1 { font-size: 40px; line-height: 1.08; }
+h2 { font-size: 30px; line-height: 1.12; }
+.label { font-size: 13px; font-weight: 700; letter-spacing: 1.5px; }
+.sub { font-size: 15px; line-height: 1.45; }
+.lead { font-size: 17px; line-height: 1.45; }
+.small { font-size: 13px; line-height: 1.4; text-align: center; }
+.soft { color: var(--light); }
+.stack { display: flex; flex-direction: column; gap: 10px; }
+.grow { flex-grow: 1; }
+.top { display: flex; justify-content: space-between; align-items: center; }
+.logo { height: 34px; width: auto; }
+.logo.big { height: 44px; align-self: flex-start; }
+.back { width: 44px; height: 44px; border: 0; border-radius: 22px; background: var(--white); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.bar { height: 6px; border-radius: 3px; background: var(--white); overflow: hidden; }
+.bar > div { height: 6px; border-radius: 3px; background: var(--gold); transition: width .2s; }
+.btn { min-height: 60px; padding: 10px 16px; border: 0; border-radius: 12px; background: var(--gold); color: var(--white); font-size: 20px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+.btn.green { background: var(--green); }
+.btn:disabled { opacity: .85; cursor: default; }
+.opt { min-height: 54px; padding: 10px 18px; border: 1.5px solid var(--green); border-radius: 12px; background: var(--white); color: var(--green); font-size: 17px; font-weight: 600; text-align: left; cursor: pointer; }
+.ghost { min-height: 52px; padding: 8px 16px; border: 1.5px solid var(--light); border-radius: 12px; background: transparent; color: var(--white); font-size: 17px; font-weight: 600; cursor: pointer; }
+.ghost:disabled { cursor: default; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 14px; font-weight: 600; }
+.field input { height: 54px; padding: 0 14px; border: 1.5px solid var(--green); border-radius: 12px; background: var(--white); font-size: 17px; color: var(--green); width: 100%; }
+body.dark .field input { border: 0; }
+.err { font-size: 15px; font-weight: 600; color: #8A1C1C; background: #FFFFFF; border-radius: 8px; padding: 10px 12px; }
+.tick { display: flex; gap: 12px; align-items: center; font-size: 16px; }
+.card { background: var(--light); color: var(--green); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.outline { border: 1.5px solid var(--light); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.score { display: flex; align-items: baseline; gap: 8px; }
+.score span:first-child { font-size: 96px; line-height: 1; }
+.test { font-size: 12px; text-align: center; opacity: .8; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<noscript><p style="padding:24px">Please turn on JavaScript to use the Buyer's-Eye Check, or call us at (917) 719-5920.</p></noscript>
+<script>
+/* ---- Settings: fill these in when the automation and the Meta pixel are ready ---- */
+var CONFIG = {
+  webhookUrl: '',   // Make.com webhook that receives each submission
+  pixelId: '',      // Meta pixel ID
+  buyerUrl: 'https://www.tworld.com/locations/new-york/ny/business-listing-search?listing={%22country%22:{%22value%22:4},%22sort%22:{%22value%22:%22-c_listing_price__c%22},%22tribe_slug%22:%22ny%22}'
+};
+
+var Q = [
+  { id: 'role', title: 'What is your role in the business?', hint: 'This check is built for owners.',
+    opts: ['I own it', 'I co-own it', 'I manage it for the owner', 'I am looking to buy a business'], exit: 3 },
+  { id: 'location', title: 'Where is the business located?', hint: 'So we match you with the right local broker.',
+    opts: ['New York City', 'New York State, outside NYC', 'Outside New York'] },
+  { id: 'where', when: function (a) { return a.location === 2; }, text: true, title: 'What city and state is it in?',
+    hint: 'So we can connect you with your local Transworld office.', label: 'City and state', ph: 'e.g. Stamford, CT' },
+  { id: 'county', when: function (a) { return a.location === 1; }, text: true, title: 'Which county is it in?',
+    hint: 'So we match you with the broker who covers your area.', label: 'County', ph: 'e.g. Nassau, Westchester' },
+  { id: 'intent', title: 'Are you thinking about selling?', hint: 'No wrong answer. It tells us how to help.',
+    opts: ['Yes, within the next 12 months', 'Maybe, in 1 to 2 years', 'No, just curious what it is worth'] },
+  { id: 'industry', text: true, title: 'What kind of business is it?', hint: 'Type it in your own words. Every industry is welcome.',
+    label: 'Type of business', ph: 'e.g. laundromat, HVAC, dental lab' },
+  { id: 'years', title: 'How long has it been operating?', hint: 'A track record is the first thing buyers check.',
+    opts: ['Under 2 years', '2 to 5 years', '5 to 10 years', 'More than 10 years'] },
+  { id: 'revenue', title: 'What were sales last year?', hint: 'A range is fine. We take businesses of every size.',
+    opts: ['Under $500K', '$500K to $1M', '$1M to $5M', 'Over $5M'] },
+  { id: 'takehome', title: 'What did you take home as the owner?', hint: 'Salary plus profit, before taxes.',
+    opts: ['Not profitable yet', 'Under $100K', '$100K to $250K', '$250K to $500K', 'Over $500K'] },
+  { id: 'assets', when: function (a) { return a.takehome === 0; }, title: 'About what are your inventory and equipment worth?',
+    hint: 'Inventory plus furniture, fixtures and equipment. A rough figure is fine.',
+    opts: ['Under $25K', '$25K to $100K', '$100K to $250K', '$250K to $500K', 'Over $500K'] }
+];
+
+var S = { screen: 'hero', qid: 'role', a: {}, t: {}, c: { name: '', phone: '', email: '' }, err: '',
+          rangeStep: '', exact: '', bov: false, ws: false,
+          leadId: 'L' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7) };
+var app = document.getElementById('app');
+
+function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+function active() { return Q.filter(function (q) { return !q.when || q.when(S.a); }); }
+function label(id) { var q = Q.filter(function (x) { return x.id === id; })[0]; var v = S.a[id]; return (q && v !== undefined && q.opts) ? q.opts[v] : ''; }
+function score() { return Math.round(40 + (S.a.takehome || 0) * 8 + (S.a.years || 0) * 6 + (S.a.revenue || 0) * 10 / 3); }
+function scoreLabel(n) { return n >= 80 ? 'Strong buyer appeal' : n >= 60 ? 'Solid, with room to raise the price' : 'Sellable with some preparation'; }
+function tag() { return S.a.location === 2 ? 'Referral' : S.a.intent === 2 ? 'Nurture' : 'Seller'; }
+
+function send(event, extra) {
+  if (!CONFIG.webhookUrl) return;
+  var n = score();
+  var d = {
+    event: event, lead_id: S.leadId, submitted_at: new Date().toISOString(), tag: tag(),
+    name: S.c.name, phone: S.c.phone, email: S.c.email,
+    role: label('role'), location: label('location'), city_state: S.t.where || '', county: S.t.county || '',
+    intent: label('intent'), industry: S.t.industry || '', years: label('years'), revenue: label('revenue'),
+    take_home: label('takehome'), assets: label('assets'), take_home_exact: S.exact || '',
+    score: n, score_label: scoreLabel(n), page_url: location.href
+  };
+  for (var k in (extra || {})) d[k] = extra[k];
+  try {
+    fetch(CONFIG.webhookUrl, { method: 'POST', mode: 'no-cors', keepalive: true, body: new URLSearchParams(d) }).catch(function () {});
+  } catch (e) {}
+}
+
+function go(patch) { for (var k in patch) S[k] = patch[k]; S.err = patch.err || ''; render(); window.scrollTo(0, 0); }
+
+var CHECK = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E9F0E0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+var ARROW = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00461C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
+function topBar() { return '<div class="top"><button class="back" data-act="back" aria-label="Back">' + ARROW + '</button><img class="logo" src="assets/logo-color.png" alt="Transworld Business Advisors"></div>'; }
+function testNote() { return CONFIG.webhookUrl ? '' : '<p class="test">Test mode: answers are not being sent anywhere yet.</p>'; }
+
+function render() {
+  var h = '', dark = false;
+  if (S.screen === 'hero') {
+    dark = true;
+    h = '<img class="logo big" src="assets/logo-white.png" alt="Transworld Business Advisors">' +
+      '<div class="stack" style="gap:14px;margin-top:14px"><div class="label soft">FREE BUYER\'S-EYE CHECK · NEW YORK</div>' +
+      '<h1 class="serif">What would a buyer pay for your business today?</h1>' +
+      '<p class="lead soft">See your business the way a buyer will. Answer 7 quick questions, get your sellability score on the spot, and a Transworld broker calls you with your price range.</p></div>' +
+      '<div class="stack" style="gap:12px"><div class="tick">' + CHECK + '<span>Takes about 30 seconds</span></div>' +
+      '<div class="tick">' + CHECK + '<span>Your score shows right away</span></div>' +
+      '<div class="tick">' + CHECK + '<span>100% confidential. Staff and customers never know</span></div></div>' +
+      '<div class="grow"></div><button class="btn" data-act="start">Start my free check</button>' +
+      '<p class="small soft">45+ years · 750,000+ buyers · #1 globally</p>' + testNote();
+  } else if (S.screen === 'q') {
+    var list = active(), i = Math.max(0, list.map(function (q) { return q.id; }).indexOf(S.qid)), q = list[i];
+    h = topBar() + '<div class="bar"><div style="width:' + Math.round((i + 1) / (list.length + 1) * 100) + '%"></div></div>' +
+      '<div class="stack" style="gap:6px"><div class="label" style="letter-spacing:1px">QUESTION ' + (i + 1) + ' OF ' + list.length + '</div>' +
+      '<h2 class="serif">' + q.title + '</h2><p class="sub">' + q.hint + '</p></div>';
+    if (q.text) {
+      h += '<form class="stack" style="gap:12px" data-form="text"><label class="field">' + q.label +
+        '<input type="text" id="txt" autocomplete="off" placeholder="' + esc(q.ph) + '" value="' + esc(S.t[q.id] || '') + '"></label>' +
+        (S.err ? '<div class="err" role="alert">' + S.err + '</div>' : '') +
+        '<button class="btn" type="submit">Continue</button></form>';
+    } else {
+      h += '<div class="stack" style="gap:9px">' + q.opts.map(function (o, n) { return '<button class="opt" data-opt="' + n + '">' + o + '</button>'; }).join('') + '</div>';
+    }
+  } else if (S.screen === 'contact') {
+    var cur = S.a.intent === 2;
+    h = topBar() + '<div class="stack" style="gap:6px"><div class="label" style="letter-spacing:1px">YOUR SCORE IS READY</div>' +
+      '<h2 class="serif">' + (cur ? 'Where should we send your results?' : 'Where should your broker reach you?') + '</h2>' +
+      '<p class="sub">' + (cur ? 'Please double-check your details so your results reach you.' : 'Your broker calls with your price range, so please double-check your phone number.') + '</p></div>' +
+      '<form class="stack" style="gap:12px" data-form="contact" novalidate>' +
+      '<label class="field">Name<input type="text" id="c_name" autocomplete="name" value="' + esc(S.c.name) + '"></label>' +
+      '<label class="field">Mobile number<input type="tel" id="c_phone" autocomplete="tel" placeholder="(212) 555-0100" value="' + esc(S.c.phone) + '"></label>' +
+      '<label class="field">Email<input type="email" id="c_email" autocomplete="email" value="' + esc(S.c.email) + '"></label>' +
+      (S.err ? '<div class="err" role="alert">' + S.err + '</div>' : '') +
+      '<button class="btn" type="submit">Show my score</button></form>' +
+      '<p class="small">We only use your details to reach you about your results. 100% confidential.</p>';
+  } else if (S.screen === 'result') {
+    dark = true;
+    var n = score(), curious = S.a.intent === 2, out = S.a.location === 2, profit = (S.a.takehome || 0) > 0;
+    var title = curious ? 'Next: your free valuation range' : 'Next: your price range';
+    var body = curious ? 'We can email you a free valuation range for your business.'
+      : out ? 'We will connect you with the Transworld office that covers your area, and a local broker will call you. The call is free and confidential.'
+      : 'A Transworld broker will call you within 1 business day. The call is free and confidential.';
+    h = '<img class="logo" style="align-self:flex-start;height:36px" src="assets/logo-white.png" alt="Transworld Business Advisors">' +
+      '<div class="stack" style="gap:4px;margin-top:6px"><div class="label soft">YOUR PRELIMINARY SELLABILITY SCORE</div>' +
+      '<div class="score"><span class="serif">' + n + '</span><span class="soft" style="font-size:22px">out of 100</span></div>' +
+      '<div style="font-size:20px;font-weight:700">' + scoreLabel(n) + '</div></div>' +
+      '<div class="card"><div class="serif" style="font-size:22px;line-height:1.15">' + title + '</div><p class="sub">' + body + '</p></div>';
+    if (curious) {
+      if (S.rangeStep === 'ask') {
+        h += '<form class="stack" style="gap:12px" data-form="range"><label class="field" style="font-size:15px">Your take-home last year, as one number' +
+          '<input type="text" id="exact" inputmode="numeric" placeholder="e.g. $180,000" value="' + esc(S.exact) + '"></label>' +
+          (S.err ? '<div class="err" role="alert">' + S.err + '</div>' : '') +
+          '<button class="btn" type="submit">Send my valuation range</button></form>';
+      } else {
+        h += '<button class="btn" data-act="range"' + (S.rangeStep === 'sent' ? ' disabled' : '') + '>' + (S.rangeStep === 'sent' ? 'Sent. Check your inbox' : 'Email me my valuation range') + '</button>';
+        if (profit) {
+          h += '<div class="outline"><div class="label soft" style="letter-spacing:1px">WANT THE FULL PICTURE?</div>' +
+            '<div class="serif" style="font-size:22px;line-height:1.15">Broker Opinion of Value, $3,750</div>' +
+            '<p class="sub soft">A full deep dive into your business, priced using Transworld\'s own sold-business data that no public source has.</p>' +
+            '<button class="ghost" style="margin-top:4px" data-act="bov"' + (S.bov ? ' disabled' : '') + '>' + (S.bov ? 'Thanks. A broker will contact you' : 'Ask about a BOV') + '</button></div>';
+        }
+      }
+    } else {
+      h += '<button class="ghost" data-act="ws"' + (S.ws ? ' disabled' : '') + '>' + (S.ws ? 'Sent. Check your inbox' : 'Email me the free SDE worksheet') + '</button>';
+    }
+    h += '<div class="grow"></div><p class="small soft">This score is a starting point based on your answers, not a formal valuation.</p>' + testNote();
+  } else if (S.screen === 'exit') {
+    h = topBar() + '<div class="stack" style="margin-top:32px"><h2 class="serif" style="font-size:32px">Looking to buy? You are in the right place.</h2>' +
+      '<p class="lead">This check is for owners. Browse every business we have for sale, with prices and cash flow, on tworld.com.</p></div>' +
+      '<a class="btn green" href="' + esc(CONFIG.buyerUrl) + '">Browse businesses for sale</a>';
+  }
+  document.body.className = dark ? 'dark' : '';
+  app.innerHTML = h;
+  var f = document.getElementById('txt') || (S.rangeStep === 'ask' ? document.getElementById('exact') : null);
+  if (f) f.focus();
+}
+
+function next() {
+  var list = active(), i = list.map(function (q) { return q.id; }).indexOf(S.qid);
+  if (i >= list.length - 1) go({ screen: 'contact' }); else go({ qid: list[i + 1].id });
+}
+function back() {
+  if (S.screen === 'exit' || S.screen === 'contact') return go({ screen: 'q' });
+  var list = active(), i = list.map(function (q) { return q.id; }).indexOf(S.qid);
+  if (i <= 0) go({ screen: 'hero' }); else go({ qid: list[i - 1].id });
+}
+
+app.addEventListener('click', function (e) {
+  var b = e.target.closest('button'); if (!b) return;
+  var act = b.getAttribute('data-act'), opt = b.getAttribute('data-opt');
+  if (opt !== null) {
+    var q = Q.filter(function (x) { return x.id === S.qid; })[0], n = Number(opt);
+    if (q.exit === n) return go({ screen: 'exit' });
+    S.a[q.id] = n; return next();
+  }
+  if (act === 'start') return go({ screen: 'q', qid: 'role' });
+  if (act === 'back') return back();
+  if (act === 'range') {
+    if ((S.a.takehome || 0) > 0) return go({ rangeStep: 'ask' });
+    send('range_request'); return go({ rangeStep: 'sent' });
+  }
+  if (act === 'bov') { send('bov_request'); return go({ bov: true }); }
+  if (act === 'ws') { send('worksheet_request'); return go({ ws: true }); }
+});
+
+app.addEventListener('submit', function (e) {
+  e.preventDefault();
+  var kind = e.target.getAttribute('data-form');
+  if (kind === 'text') {
+    var v = document.getElementById('txt').value.trim();
+    if (!v) return go({ err: 'Please type an answer to continue.' });
+    S.t[S.qid] = v; return next();
+  }
+  if (kind === 'contact') {
+    var name = document.getElementById('c_name').value.trim(), phone = document.getElementById('c_phone').value.trim(),
+        email = document.getElementById('c_email').value.trim();
+    S.c = { name: name, phone: phone, email: email };
+    var d = phone.replace(/\D/g, ''); if (d.length === 11 && d[0] === '1') d = d.slice(1);
+    if (!name) return go({ err: 'Please enter your name.' });
+    if (!(d.length === 10 && /[2-9]/.test(d[0]) && /[2-9]/.test(d[3]))) return go({ err: 'Please enter a 10-digit US phone number, area code first.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return go({ err: 'Please check your email address.' });
+    S.c.phone = '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
+    var isLead = S.a.location !== 2 && S.a.intent !== 2;
+    send('lead', { meta_lead: isLead ? 'yes' : 'no' });
+    if (isLead && window.fbq) fbq('track', 'Lead');
+    return go({ screen: 'result' });
+  }
+  if (kind === 'range') {
+    var x = document.getElementById('exact').value.replace(/[^\d.]/g, '');
+    if (!x || Number(x) <= 0) return go({ err: 'Please enter your take-home as a number, for example 180000.' });
+    S.exact = String(Math.round(Number(x)));
+    send('range_request'); return go({ rangeStep: 'sent' });
+  }
+});
+
+if (CONFIG.pixelId) {
+  !function (f, b, e, v, n, t, s) { if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments); };
+    if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0; t.src = v;
+    s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s); }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', CONFIG.pixelId); fbq('track', 'PageView');
+}
+render();
+</script>
+</body>
+</html>
