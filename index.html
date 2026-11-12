@@ -59,7 +59,7 @@ body.dark .field input { border: 0; }
 <script>
 /* ---- Settings: fill these in when the automation and the Meta pixel are ready ---- */
 var CONFIG = {
-  webhookUrl: '',   // Make.com webhook that receives each submission
+  webhookUrl: 'https://hook.us1.make.com/sigi8zmttw49mh1r5s9p8ly1qeoix1q3',   // Make.com webhook that receives each submission
   pixelId: '',      // Meta pixel ID
   buyerUrl: 'https://www.tworld.com/locations/new-york/ny/business-listing-search?listing={%22country%22:{%22value%22:4},%22sort%22:{%22value%22:%22-c_listing_price__c%22},%22tribe_slug%22:%22ny%22}'
 };
@@ -101,10 +101,10 @@ function scoreLabel(n) { return n >= 80 ? 'Strong buyer appeal' : n >= 60 ? 'Sol
 function tag() { return S.a.location === 2 ? 'Referral' : S.a.intent === 2 ? 'Nurture' : 'Seller'; }
 
 function send(event, extra) {
-  if (!CONFIG.webhookUrl) return;
+  if (!CONFIG.webhookUrl || S.bot) return;
   var n = score();
   var d = {
-    event: event, lead_id: S.leadId, submitted_at: new Date().toISOString(), tag: tag(),
+    event: event, lead_id: S.leadId, submitted_at: new Date().toISOString(), tag: tag(), meta_lead: '',
     name: S.c.name, phone: S.c.phone, email: S.c.email,
     role: label('role'), location: label('location'), city_state: S.t.where || '', county: S.t.county || '',
     intent: label('intent'), industry: S.t.industry || '', years: label('years'), revenue: label('revenue'),
@@ -159,6 +159,7 @@ function render() {
       '<label class="field">Name<input type="text" id="c_name" autocomplete="name" value="' + esc(S.c.name) + '"></label>' +
       '<label class="field">Mobile number<input type="tel" id="c_phone" autocomplete="tel" placeholder="(212) 555-0100" value="' + esc(S.c.phone) + '"></label>' +
       '<label class="field">Email<input type="email" id="c_email" autocomplete="email" value="' + esc(S.c.email) + '"></label>' +
+      '<input type="text" id="c_hp" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">' +
       (S.err ? '<div class="err" role="alert">' + S.err + '</div>' : '') +
       '<button class="btn" type="submit">Show my score</button></form>' +
       '<p class="small">We only use your details to reach you about your results. 100% confidential.</p>';
@@ -244,6 +245,7 @@ app.addEventListener('submit', function (e) {
     var name = document.getElementById('c_name').value.trim(), phone = document.getElementById('c_phone').value.trim(),
         email = document.getElementById('c_email').value.trim();
     S.c = { name: name, phone: phone, email: email };
+    if (document.getElementById('c_hp').value) S.bot = true;
     var d = phone.replace(/\D/g, ''); if (d.length === 11 && d[0] === '1') d = d.slice(1);
     if (!name) return go({ err: 'Please enter your name.' });
     if (!(d.length === 10 && /[2-9]/.test(d[0]) && /[2-9]/.test(d[3]))) return go({ err: 'Please enter a 10-digit US phone number, area code first.' });
