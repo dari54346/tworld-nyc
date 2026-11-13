@@ -224,7 +224,7 @@ function render() {
         }
       }
     } else {
-      h += '<button class="ghost" data-act="ws"' + (S.ws ? ' disabled' : '') + '>' + (S.ws ? 'Sent. Check your inbox' : 'Email me the free SDE worksheet') + '</button>';
+      h += '<button class="btn" data-act="ws"' + (S.ws ? ' disabled' : '') + '>' + (S.ws ? 'Sent. Check your inbox' : 'Email me the free SDE worksheet') + '</button>';
     }
     h += '<div class="grow"></div><p class="small soft">This score is a starting point based on your answers, not a formal valuation.</p>' + testNote();
   } else if (S.screen === 'exit') {
