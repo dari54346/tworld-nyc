@@ -40,6 +40,7 @@ h2 { font-size: 30px; line-height: 1.12; }
 .opt { min-height: 54px; padding: 10px 18px; border: 1.5px solid var(--green); border-radius: 12px; background: var(--white); color: var(--green); font-size: 17px; font-weight: 600; text-align: left; cursor: pointer; }
 .ghost { min-height: 52px; padding: 8px 16px; border: 1.5px solid var(--light); border-radius: 12px; background: transparent; color: var(--white); font-size: 17px; font-weight: 600; cursor: pointer; }
 .ghost:disabled { cursor: default; }
+.done { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; line-height: 1.35; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .field { display: flex; flex-direction: column; gap: 5px; font-size: 14px; font-weight: 600; }
 .field input { height: 54px; padding: 0 14px; border: 1.5px solid var(--green); border-radius: 12px; background: var(--white); font-size: 17px; color: var(--green); width: 100%; }
@@ -155,6 +156,7 @@ function go(patch) { for (var k in patch) S[k] = patch[k]; S.err = patch.err || 
 var CHECK = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E9F0E0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
 var ARROW = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00461C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>';
 function topBar() { return '<div class="top"><button class="back" data-act="back" aria-label="Back">' + ARROW + '</button><img class="logo" src="assets/logo-color.png" alt="Transworld Business Advisors"></div>'; }
+function done(t) { return '<p class="done" role="status">' + CHECK + '<span>' + t + '</span></p>'; }
 function testNote() { return CONFIG.webhookUrl ? '' : '<p class="test">Test mode: answers are not being sent anywhere yet.</p>'; }
 
 function render() {
@@ -215,16 +217,16 @@ function render() {
           (S.err ? '<div class="err" role="alert">' + S.err + '</div>' : '') +
           '<button class="btn" type="submit">Send my valuation range</button></form>';
       } else {
-        h += '<button class="btn" data-act="range"' + (S.rangeStep === 'sent' ? ' disabled' : '') + '>' + (S.rangeStep === 'sent' ? 'Sent. Check your inbox' : 'Email me my valuation range') + '</button>';
+        h += S.rangeStep === 'sent' ? done('Sent. Check your inbox') : '<button class="btn" data-act="range">Email me my valuation range</button>';
         if (profit) {
           h += '<div class="outline"><div class="label soft" style="letter-spacing:1px">WANT THE FULL PICTURE?</div>' +
             '<div class="serif" style="font-size:22px;line-height:1.15">Broker Opinion of Value, $3,750</div>' +
             '<p class="sub soft">A full deep dive into your business, priced using Transworld\'s own sold-business data that no public source has.</p>' +
-            '<button class="ghost" style="margin-top:4px" data-act="bov"' + (S.bov ? ' disabled' : '') + '>' + (S.bov ? 'Thanks. A broker will contact you' : 'Ask about a BOV') + '</button></div>';
+            (S.bov ? done('Thanks. A broker will contact you') : '<button class="ghost" style="margin-top:4px" data-act="bov">Ask about a BOV</button>') + '</div>';
         }
       }
     } else {
-      h += '<button class="btn" data-act="ws"' + (S.ws ? ' disabled' : '') + '>' + (S.ws ? 'Sent. Check your inbox' : 'Email me the free SDE worksheet') + '</button>';
+      h += S.ws ? done('Sent. Check your inbox') : '<button class="btn" data-act="ws">Email me the free SDE worksheet</button>';
     }
     h += '<div class="grow"></div><p class="small soft">This score is a starting point based on your answers, not a formal valuation.</p>' + testNote();
   } else if (S.screen === 'exit') {
